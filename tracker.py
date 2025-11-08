@@ -2,6 +2,16 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 import mediapipe as mp
+import serial
+import time
+
+# ---------------- Arduino Setup ----------------
+arduino = None
+try:
+    arduino = serial.Serial('COM7', 9600, timeout=1)
+    time.sleep(2)  # wait for Arduino to initialize
+except serial.SerialException:
+    print("Arduino not connected. Continuing without serial...")
 
 # ---------------- MediaPipe ----------------
 mp_pose = mp.solutions.pose
@@ -19,16 +29,17 @@ if not cap.isOpened():
 cv2.namedWindow("Chair Tracker Hybrid", cv2.WINDOW_NORMAL)
 cv2.moveWindow("Chair Tracker Hybrid", 100, 100)
 
+# Initialize variables
 delta_x, delta_y = 0, 0
+com_x, com_y = 0, 0           # always defined
 frame_counter = 0
-YOLO_INTERVAL = 15  # run YOLO every 15 frames
+YOLO_INTERVAL = 15             # run YOLO every 15 frames
 
 while True:
     ret, frame = cap.read()
     if not ret:
         break
 
-    frame = cv2.flip(frame, 1)
     height, width, _ = frame.shape
     cross_x, cross_y = width // 2, height // 2
 
@@ -38,7 +49,6 @@ while True:
 
     if results.pose_landmarks:
         landmarks = results.pose_landmarks.landmark
-        # torso COM
         torso_indices = [
             mp_pose.PoseLandmark.LEFT_HIP,
             mp_pose.PoseLandmark.RIGHT_HIP,
@@ -61,20 +71,15 @@ while True:
             com_y = int(np.mean(torso_np[:, 1]))
             cv2.circle(frame, (com_x, com_y), 8, (255, 0, 0), -1)
 
-            # MediaPipe updates delta_x every frame
-            delta_x = com_x - cross_x
-            delta_y = com_y - cross_y
-
-            # optional: size for speed scaling
-            x_min, y_min = np.min(torso_np, axis=0)
-            x_max, y_max = np.max(torso_np, axis=0)
-            box_area = (x_max - x_min) * (y_max - y_min)
+    # Update delta_x based on MediaPipe COM
+    delta_x = com_x - cross_x
+    delta_y = com_y - cross_y
 
     # ---------------- YOLO Correction ----------------
     frame_counter += 1
     if frame_counter % YOLO_INTERVAL == 0:
         results_yolo = model(frame)
-        for result in results_yolo:
+        for result in results_yolo: 
             boxes = result.boxes
             if boxes is None or len(boxes) == 0:
                 continue
@@ -82,19 +87,31 @@ while True:
                 cls = int(box.cls[0])
                 if cls == 0 and float(box.conf[0]) > 0.5:  # person
                     x1, y1, x2, y2 = box.xyxy[0].cpu().numpy().astype(int)
-                    # refine MediaPipe COM (optional smoothing)
                     com_x_yolo = (x1 + x2) // 2
                     com_y_yolo = (y1 + y2) // 2
-                    # nudge MediaPipe COM slightly toward YOLO COM
+                    # Refine MediaPipe COM slightly toward YOLO COM
                     com_x = int(0.7 * com_x + 0.3 * com_x_yolo)
                     com_y = int(0.7 * com_y + 0.3 * com_y_yolo)
-                    # no direct delta_x overwrite from YOLO
+                    # Recompute delta_x based on refined COM
+                    delta_x = com_x - cross_x
+                    delta_y = com_y - cross_y
                     break  # only first confident person
 
-    # ---------------- Draw crosshair & delta_x ----------------
-    cv2.drawMarker(frame, (cross_x, cross_y), (0, 0, 255), markerType=cv2.MARKER_CROSS, markerSize=20, thickness=2)
-    cv2.putText(frame, f"Delta X (MediaPipe): {delta_x}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2)
-    cv2.putText(frame, f"Delta Y: {delta_y}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2)
+    # ---------------- Send delta_x to Arduino ----------------
+    if arduino is not None:
+        try:
+            message = f"{delta_x}\n"
+            arduino.write(message.encode())
+        except Exception as e:
+            print("Error sending to Arduino:", e)
+
+    # ---------------- Display ----------------
+    cv2.drawMarker(frame, (cross_x, cross_y), (0, 0, 255),
+                   markerType=cv2.MARKER_CROSS, markerSize=20, thickness=2)
+    cv2.putText(frame, f"Delta X (MediaPipe): {delta_x}", (10, 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+    cv2.putText(frame, f"Delta Y: {delta_y}", (10, 60),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
 
     cv2.imshow("Chair Tracker Hybrid", frame)
     if cv2.waitKey(1) & 0xFF == 27:
@@ -102,3 +119,5 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
+if arduino is not None:
+    arduino.close()

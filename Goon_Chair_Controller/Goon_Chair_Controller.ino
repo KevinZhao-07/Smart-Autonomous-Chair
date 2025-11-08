@@ -1,19 +1,14 @@
 // -------------------- Motor pins --------------------
 const int leftForward  = 11;
 const int leftReverse  = 10;
-const int rightForward = 9;
-const int rightReverse = 8;
+const int rightForward = 6;
+const int rightReverse = 5;
 
 // -------------------- Constants --------------------
-const int MAX_SPEED = 200;
-const float kP = 0.5;            // proportional gain for X-centering
-const int DEFAULT_FORWARD = 150;  // default forward speed
-const int DEADZONE = 10;          // pixels
-
-// Ultrasonic pins
-const int trigPin = 6;
-const int echoPin = 7;
-const int STOP_DISTANCE_CM = 20; // stop if closer than 20cm
+const int MAX_SPEED = 150;
+const float kP = 0.167;            // proportional gain for X-centering
+const int DEFAULT_FORWARD = 67;    // default forward speed
+const int DEADZONE = 10;           // pixels
 
 // -------------------- Motor state --------------------
 int currentLeft  = 0;
@@ -31,15 +26,13 @@ void setup() {
   pinMode(rightForward, OUTPUT);
   pinMode(rightReverse, OUTPUT);
 
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-
   analogWrite(leftForward, 0);
   analogWrite(leftReverse, 0);
   analogWrite(rightForward, 0);
   analogWrite(rightReverse, 0);
 
-  Serial.begin(9600);  // for receiving deltaX from PC
+  Serial.begin(9600);  // must match Python baud
+  Serial.println("Arduino ready for deltaX input...");
 }
 
 // -------------------- Motor update / ramping --------------------
@@ -71,50 +64,33 @@ void setMotorPWM(int forwardPin, int reversePin, int speed){
   }
 }
 
-// -------------------- Ultrasonic --------------------
-long readUltrasonicCM() {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
-  long duration = pulseIn(echoPin, HIGH, 30000); // timeout 30ms
-  long distance = duration * 0.034 / 2;          // cm
-  return distance;
-}
-
 // -------------------- Track function --------------------
 void track(int deltaX) {
-  // Read ultrasonic distance
-  long distance = readUltrasonicCM();
-  if(distance > 0 && distance < STOP_DISTANCE_CM){
-    // Too close -> stop
-    targetLeft = 0;
-    targetRight = 0;
-    return;
-  }
+  Serial.print("Received deltaX: ");
+  Serial.println(deltaX);
 
-  // Deadzone: person is centered
+  // Deadzone
   if(abs(deltaX) < DEADZONE) {
     targetLeft  = DEFAULT_FORWARD;
     targetRight = DEFAULT_FORWARD;
     return;
   }
 
-  // Adjust motor speed proportionally
   int adjustment = int(kP * deltaX);
-
-  targetLeft  = constrain(DEFAULT_FORWARD - adjustment, -MAX_SPEED, MAX_SPEED);
-  targetRight = constrain(DEFAULT_FORWARD + adjustment, -MAX_SPEED, MAX_SPEED);
+  targetLeft  = constrain(DEFAULT_FORWARD + adjustment, -MAX_SPEED, MAX_SPEED);
+  targetRight = constrain(DEFAULT_FORWARD - adjustment, -MAX_SPEED, MAX_SPEED);
 }
 
 // -------------------- Main loop --------------------
 void loop() {
-  if(Serial.available() > 0) {
-    int deltaX = Serial.parseInt();
-    track(deltaX);
+  // Check for serial input
+  while(Serial.available() > 0) {
+    String line = Serial.readStringUntil('\n');
+    line.trim(); // remove whitespace
+    if(line.length() > 0){
+      int deltaX = line.toInt();
+      track(deltaX);
+    }
   }
-
   updateMotors();
 }
