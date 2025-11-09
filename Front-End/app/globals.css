@@ -73,14 +73,16 @@
   cursor: none;
 }
 
-.cursor-sperm {
-  width: 24px;
-  height: 24px;
+.cursor-circle {
+  width: 12px;
+  height: 12px;
   position: fixed;
   pointer-events: none;
   z-index: 9999;
   transform: translate(-50%, -50%);
-  transition: transform 0.1s ease-out;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
 /* Particle animation */

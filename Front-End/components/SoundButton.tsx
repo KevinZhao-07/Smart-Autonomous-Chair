@@ -109,12 +109,11 @@ export function SoundButton({ label, soundUrl, onPlay }: SoundButtonProps) {
   return (
     <Button
       onClick={handleClick}
-      className="backdrop-blur-md bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold px-4 md:px-6 py-2 md:py-3 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl text-sm md:text-base w-full"
+      className="backdrop-blur-sm bg-white/10 hover:bg-white/20 border border-white/20 text-white/90 text-xs px-3 py-1.5 rounded transition-all duration-150 hover:bg-white/25"
       variant="ghost"
       type="button"
     >
-      {label}
-      {isPlaying && <span className="ml-2 animate-pulse">🔊</span>}
+      {label.replace("Sound ", "")}
     </Button>
   );
 }

@@ -18,14 +18,13 @@ export function ControlButton({ label, onClick, active = false }: ControlButtonP
   return (
     <Button
       onClick={handleClick}
-      className={`backdrop-blur-md bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl text-base md:text-lg w-full sm:w-auto ${
-        active ? "bg-white/40 ring-2 ring-white/50 shadow-2xl" : ""
+      className={`backdrop-blur-sm bg-white/10 hover:bg-white/20 border border-white/20 text-white/90 text-sm px-4 py-2 rounded transition-all duration-150 ${
+        active ? "bg-white/25 border-white/40" : ""
       }`}
       variant="ghost"
       type="button"
     >
       {label}
-      {active && <span className="ml-2 animate-pulse" aria-hidden="true">⚡</span>}
     </Button>
   );
 }
