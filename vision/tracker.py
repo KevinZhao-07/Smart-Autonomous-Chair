@@ -8,7 +8,7 @@ from queue import Queue
 import asyncio
 import websockets
 
-# -------------------- Arduino Setup --------------------
+# ---------------- Arduino Setup ----------------
 arduino_port = 'COM7'
 arduino_baud = 115200
 arduino = None
@@ -20,10 +20,11 @@ try:
 except serial.SerialException:
     print("⚠️ Arduino not connected. Continuing without serial...")
 
-# -------------------- Serial Writer Thread --------------------
+# ---------------- Serial Writer Thread ----------------
 delta_queue = Queue()
 
 def serial_writer():
+    """Send latest delta_x or command to Arduino asynchronously."""
     global arduino
     while True:
         if not delta_queue.empty() and arduino:
@@ -37,33 +38,14 @@ def serial_writer():
 
 Thread(target=serial_writer, daemon=True).start()
 
-# -------------------- WebSocket --------------------
-current_command = "track"  # default command
-
-async def ws_handler(websocket, path):
-    global current_command
-    async for message in websocket:
-        if message in ["stop", "track", "scan"]:
-            print(f"Received command: {message}")
-            current_command = message
-        else:
-            print("Unknown command:", message)
-
-async def ws_server():
-    async with websockets.serve(ws_handler, "0.0.0.0", 8765):
-        print("WebSocket server started on port 8765")
-        await asyncio.Future()  # run forever
-
-def start_ws():
-    asyncio.run(ws_server())
-
-Thread(target=start_ws, daemon=True).start()
-
-# -------------------- MediaPipe Setup --------------------
+# ---------------- MediaPipe Setup ----------------
 mp_pose = mp.solutions.pose
-pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+pose = mp_pose.Pose(
+    min_detection_confidence=0.5,
+    min_tracking_confidence=0.5
+)
 
-# -------------------- Webcam Setup --------------------
+# ---------------- Webcam Setup ----------------
 cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
@@ -78,12 +60,36 @@ if not cap.isOpened():
 cv2.namedWindow("MediaPipe Chair Tracker", cv2.WINDOW_NORMAL)
 cv2.moveWindow("MediaPipe Chair Tracker", 100, 100)
 
-# -------------------- Command Codes --------------------
+# ---------------- Command Codes ----------------
 COMMAND_STOP = 0
-COMMAND_TRACK = 1
 COMMAND_SCAN = 2
+COMMAND_TRACK = 1  # optional, just for clarity
 
-# -------------------- Main Loop --------------------
+# ---------------- Global Command ----------------
+current_command = "stop"  # default; will be updated via WebSocket
+
+# ---------------- WebSocket Server ----------------
+async def ws_handler(websocket):
+    global current_command
+    async for message in websocket:
+        if message in ["stop", "track", "scan"]:
+            print(f"✅ Received command from UI: {message}")
+            current_command = message
+        else:
+            print("❌ Unknown command:", message)
+
+async def ws_server():
+    async with websockets.serve(ws_handler, "0.0.0.0", 8765):
+        print("🌐 WebSocket server started on port 8765")
+        await asyncio.Future()  # run forever
+
+# Run WebSocket server in background thread
+def start_ws():
+    asyncio.run(ws_server())
+
+Thread(target=start_ws, daemon=True).start()
+
+# ---------------- Main Loop ----------------
 while True:
     ret, frame = cap.read()
     if not ret:
@@ -100,8 +106,8 @@ while True:
         command_to_send = COMMAND_STOP
 
     elif current_command == "scan":
+        # simple scanning placeholder (e.g., rotate in place)
         command_to_send = COMMAND_SCAN
-        # For scan logic: send some special command or implement in Arduino
 
     elif current_command == "track":
         # MediaPipe tracking
@@ -146,6 +152,7 @@ while True:
     cv2.drawMarker(display_frame, (cross_x, cross_y), (0, 0, 255),
                    markerType=cv2.MARKER_CROSS, markerSize=20, thickness=2)
 
+    # Draw torso points and COM
     if current_command == "track" and results.pose_landmarks:
         for idx in torso_indices:
             lm = results.pose_landmarks.landmark[idx]
@@ -156,6 +163,7 @@ while True:
         if torso_points:
             cv2.circle(display_frame, (width - com_x, height // 2), 8, (255, 0, 0), -1)
 
+    # Display delta or command
     if command_to_send == COMMAND_STOP:
         text = "STOP"
         color = (0, 0, 255)
@@ -174,7 +182,7 @@ while True:
     if cv2.waitKey(1) & 0xFF == 27:
         break
 
-# -------------------- Cleanup --------------------
+# ---------------- Cleanup ----------------
 cap.release()
 cv2.destroyAllWindows()
 if arduino is not None:
