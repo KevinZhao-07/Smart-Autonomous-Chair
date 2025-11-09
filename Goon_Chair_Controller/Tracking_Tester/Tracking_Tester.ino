@@ -77,8 +77,8 @@ void track(int deltaX) {
   }
 
   int adjustment = int(kP * deltaX);
-  targetLeft  = constrain(DEFAULT_FORWARD + adjustment, -MAX_SPEED, MAX_SPEED);
-  targetRight = constrain(DEFAULT_FORWARD - adjustment, -MAX_SPEED, MAX_SPEED);
+  targetLeft  = constrain(adjustment, -MAX_SPEED, MAX_SPEED);
+  targetRight = constrain(-adjustment, -MAX_SPEED, MAX_SPEED);
 }
 
 // -------------------- Main loop --------------------
