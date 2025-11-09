@@ -109,7 +109,7 @@ export function SoundButton({ label, soundUrl, onPlay }: SoundButtonProps) {
   return (
     <Button
       onClick={handleClick}
-      className="backdrop-blur-sm bg-white/10 hover:bg-white/20 border border-white/20 text-white/90 text-xs px-3 py-1.5 rounded transition-all duration-150 hover:bg-white/25"
+      className="backdrop-blur-md bg-white/20 hover:bg-white/30 border border-white/30 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg transition-all duration-150 hover:bg-white/30"
       variant="ghost"
       type="button"
     >

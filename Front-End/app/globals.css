@@ -88,14 +88,11 @@
 /* Particle animation */
 @keyframes particle-float {
   0% {
-    transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+    transform: translate(0, 0) scale(1);
     opacity: 1;
   }
-  50% {
-    opacity: 0.8;
-  }
   100% {
-    transform: translateY(-120px) translateX(var(--tx, 0)) rotate(720deg) scale(0.3);
+    transform: translate(var(--tx, 0), var(--ty, 0)) scale(0);
     opacity: 0;
   }
 }
@@ -107,7 +104,9 @@
   background: white;
   border-radius: 50%;
   pointer-events: none;
-  animation: particle-float 1.2s ease-out forwards;
+  animation-name: particle-float;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
   will-change: transform, opacity;
 }
 

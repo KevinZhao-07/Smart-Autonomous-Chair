@@ -3,7 +3,6 @@
 import { useState, useCallback, useRef } from "react";
 import { CustomCursor } from "@/components/CustomCursor";
 import { ParticleEffect } from "@/components/ParticleEffect";
-import { SoundButton } from "@/components/SoundButton";
 import { ControlButton } from "@/components/ControlButton";
 
 interface Particle {
@@ -16,20 +15,10 @@ export default function Home() {
   const [particles, setParticles] = useState<Particle[]>([]);
   const [trackPersonActive, setTrackPersonActive] = useState(false);
   const [gooningMachineActive, setGooningMachineActive] = useState(false);
+  const [findPersonActive, setFindPersonActive] = useState(false);
   const particleIdRef = useRef(0);
 
-  const soundLabels = [
-    "Sound 1",
-    "Sound 2",
-    "Sound 3",
-    "Sound 4",
-    "Sound 5",
-    "Sound 6",
-    "Sound 7",
-    "Sound 8",
-    "Sound 9",
-    "Sound 10",
-  ];
+
 
   const handleButtonClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
     try {
@@ -67,6 +56,11 @@ export default function Home() {
     setGooningMachineActive((prev) => !prev);
   }, [handleButtonClick]);
 
+  const handleFindPerson = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    handleButtonClick(e);
+    setFindPersonActive((prev) => !prev);
+  }, [handleButtonClick]);
+
   // New handler for sending movement commands
   const handleMove = useCallback(async (direction: string) => {
     console.log(`Sending command: ${direction}`);
@@ -90,35 +84,38 @@ export default function Home() {
     <main className="custom-cursor min-h-screen relative overflow-hidden bg-black">
       <CustomCursor />
       
-      {/* Livestream Background - Full Screen */}
-      <div className="absolute inset-0 z-0">
+      {/* YouTube Background */}
+      <div className="absolute top-0 left-0 w-full h-full z-0 overflow-hidden">
+        <iframe
+          className="absolute top-1/2 left-1/2 w-full h-full -translate-x-1/2 -translate-y-1/2"
+          src="https://www.youtube.com/embed/5vfaDsMhCF4?autoplay=1&mute=1&loop=1&playlist=5vfaDsMhCF4&controls=0&showinfo=0&autohide=1&modestbranding=1&iv_load_policy=3"
+          frameBorder="0"
+          allow="autoplay; encrypted-media"
+          allowFullScreen
+          style={{
+            minWidth: '100%',
+            minHeight: '100%',
+            width: 'auto',
+            height: 'auto',
+            aspectRatio: '16 / 9',
+          }}
+        ></iframe>
         <div className="absolute inset-0 bg-black/10" />
+      </div>
+
+      {/* Title */}
+      <div className="absolute top-8 left-8 z-20">
+        <h1 className="text-5xl font-thin text-white tracking-widest" style={{fontFamily: 'serif', textShadow: '0 0 15px rgba(255, 255, 255, 0.5)'}}>
+            The Goon Chair
+        </h1>
       </div>
 
       {/* Content - All at bottom */}
       <div className="relative z-10 min-h-screen flex flex-col justify-end">
         {/* All Controls at Bottom */}
-        <div className="pb-4 px-4 md:px-6 space-y-2.5">
-          {/* Title - Minimal */}
-          <div className="mb-3">
-            <h1 className="text-xl md:text-2xl font-light text-white/80">
-              The Goon Chair
-            </h1>
-          </div>
-
-          {/* Sound Buttons - Minimal */}
-          <div className="flex flex-wrap gap-1.5 justify-center">
-            {soundLabels.map((label, index) => (
-              <SoundButton
-                key={index}
-                label={label}
-                onPlay={handleButtonClick}
-              />
-            ))}
-          </div>
-
+        <div className="pb-8 px-4 md:px-6 space-y-4">
           {/* Control Buttons */}
-          <div className="flex gap-2 justify-center">
+          <div className="flex gap-4 justify-center">
             <ControlButton
               label="Stop"
               onClick={(e) => { handleButtonClick(e); handleMove('stop'); }}
@@ -127,6 +124,11 @@ export default function Home() {
               label="Track Person"
               onClick={handleTrackPerson}
               active={trackPersonActive}
+            />
+            <ControlButton
+              label="Find Person"
+              onClick={handleFindPerson}
+              active={findPersonActive}
             />
             <ControlButton
               label="Gooning Machine"

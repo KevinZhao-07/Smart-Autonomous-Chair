@@ -26,7 +26,7 @@ export function ParticleEffect({ id, x, y, onComplete }: ParticleEffectProps) {
     }
     particlesRef.current = [];
 
-    const particleCount = 30;
+    const particleCount = 20 + Math.floor(Math.random() * 20); // Randomize particle count
     const particles: HTMLDivElement[] = [];
 
     const cleanup = () => {
@@ -49,17 +49,21 @@ export function ParticleEffect({ id, x, y, onComplete }: ParticleEffectProps) {
         particle.className = "particle";
         particle.setAttribute("data-particle-id", `${id}-${i}`);
         
-        const angle = (Math.PI * 2 * i) / particleCount;
-        const velocity = 60 + Math.random() * 80;
+        const angle = Math.random() * Math.PI * 2; // Random angle
+        const velocity = 50 + Math.random() * 100; // Random velocity
         const tx = Math.cos(angle) * velocity;
-        const randomDelay = Math.random() * 0.3;
+        const ty = Math.sin(angle) * velocity; // Add vertical randomness
+        const randomDelay = Math.random() * 0.2; // Shorter delay
+        const duration = 0.8 + Math.random() * 0.8; // Random duration
         
         particle.style.position = "fixed";
         particle.style.left = `${x}px`;
         particle.style.top = `${y}px`;
         particle.style.setProperty("--tx", `${tx}px`);
+        particle.style.setProperty("--ty", `${ty}px`);
         particle.style.animationDelay = `${randomDelay}s`;
-        const size = 5 + Math.random() * 8;
+        particle.style.animationDuration = `${duration}s`; // Set random duration
+        const size = 3 + Math.random() * 9; // Random size
         particle.style.width = `${size}px`;
         particle.style.height = `${size}px`;
         particle.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.8)";
@@ -76,7 +80,7 @@ export function ParticleEffect({ id, x, y, onComplete }: ParticleEffectProps) {
           cleanup();
           onComplete();
         }
-      }, 1300);
+      }, 1800); // Increased timeout to account for longer animation durations
     } catch (error) {
       console.error("Error creating particles:", error);
       cleanup();

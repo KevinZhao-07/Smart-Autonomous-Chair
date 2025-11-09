@@ -18,8 +18,8 @@ export function ControlButton({ label, onClick, active = false }: ControlButtonP
   return (
     <Button
       onClick={handleClick}
-      className={`backdrop-blur-sm bg-white/10 hover:bg-white/20 border border-white/20 text-white/90 text-sm px-4 py-2 rounded transition-all duration-150 ${
-        active ? "bg-white/25 border-white/40" : ""
+      className={`backdrop-blur-md bg-white/20 hover:bg-white/30 border border-white/30 text-white text-lg px-6 py-3 rounded-lg shadow-lg transition-all duration-150 ${
+        active ? "bg-white/30 border-white/50" : ""
       }`}
       variant="ghost"
       type="button"
