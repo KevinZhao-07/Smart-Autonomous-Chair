@@ -1,5 +1,5 @@
 # 🤖 Smart Chair
-### Automating Sensitive Medical Sample Collection with Precision and Comfort
+### *Automating Sensitive Medical Sample Collection with Precision and Comfort*
 
 <img width="854" height="697" alt="image.jpg" src="https://github.com/KevinZhao-07/Go-on-Chair/blob/main/test/image.jpg?raw=true"/>
 
