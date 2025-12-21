@@ -1,49 +1,51 @@
-# 🤖 Smart Chair
-### *Automating Sensitive Medical Sample Collection with Precision and Comfort*
+# 🤖 Smart Autonomous Chair
 
-<img width="854" height="697" alt="image.jpg" src="https://github.com/KevinZhao-07/Go-on-Chair/blob/main/test/image.jpg?raw=true"/>
-
----
-
-## 💡 Inspiration
-Our team wanted to explore how **robotics** and **computer vision** can be used to automate delicate clinical or laboratory procedures where **precision**, **safety**, and **privacy** are essential.  
-We were inspired by the potential to **reduce human involvement** in repetitive or discomfort-inducing tasks while maintaining **accuracy**, **reliability**, and **user comfort**.
+A real-time vision-guided robotics project integrating computer vision, embedded control, and custom mechanical hardware to enable human-following behavior.
 
 ---
 
-## 🧠 What We Learned
-Throughout the project, we learned how to:
-- 🖥️ Use **OpenCV** for real-time human tracking and object recognition.  
-- ⚡ Interface **Arduino microcontrollers** with motor drivers and ultrasonic distance sensors for coordinated movement.  
-- 🛠️ Design a **mechanical actuation system** for repeatable, controlled motion.  
-- 🔄 Implement **feedback loops** for adaptive and safe robotic behavior.  
-- ⚖️ Consider **ethics, safety, and privacy** in human-interactive robotics.
+## Overview
+
+This project explores how camera-based perception can be integrated with embedded motor control to drive powered motion on an existing chair platform. The system detects and tracks a human target in real time and commands motor outputs accordingly, emphasizing safe operation and system stability.
 
 ---
 
-## 🏗️ How We Built It
+## System Architecture
 
-### Hardware Setup
-- Connected an **Arduino** to **two 12V DC motors** via a motor driver.  
-- Added an **ultrasonic sensor** to detect proximity and user presence.  
-
-### Software & Communication
-- Used **Python** with **OpenCV** to implement a **real-time person-following and object-detection system**.  
-- Sent commands from Python to Arduino via **serial communication**, synchronizing movement and feedback.  
-
-### Control & Actuation
-- Programmed logic for **speed adjustment**, **direction control**, and **presence detection**.  
-- Designed **mechanical components** to perform automated actions based on sensor input.
+- **Perception**: Python + OpenCV and MediaPipe for real-time human detection and position estimation
+- **Control**: Proportional control loop converting target position into motion commands
+- **Embedded**: Arduino-based motor control driving high-current DC motors via IBT-2 motor drivers
+- **Mechanical**: Custom CAD-designed, 3D-printed motor mounts integrated onto an existing chair frame
 
 ---
 
-## ⚠️ Challenges We Faced
-- Maintaining stable **OpenCV tracking** under variable lighting conditions.  
-- Synchronizing **real-time vision processing** with hardware actuation.  
-- Balancing **torque** and **power constraints** to prevent stalling or overheating.  
-- Ensuring **electrical and mechanical safety** during continuous operation.
+## Implementation Details
+
+### Vision & Control
+- Processes camera input to estimate relative target position
+- Applies proportional control to compute speed and direction commands
+- Implements speed limiting to maintain stable behavior
+
+### Embedded System
+- Receives serial commands from the vision pipeline
+- Drives DC motors through IBT-2 drivers
+- Enforces motion smoothing and safety limits
+
+### Mechanical Design
+- Designed and 3D-printed custom motor mounts
+- Integrated motors without modifying the original chair structure
 
 ---
 
-## ✅ Key Takeaway
-This project combined **software**, **hardware**, and **design thinking** to demonstrate how robotics can improve **precision**, **automation**, and **safety** in **assistive and clinical environments**.
+## Challenges
+
+- Maintaining stable tracking under variable lighting conditions
+- Synchronizing real-time vision processing with embedded actuation
+- Managing torque and power constraints to avoid stalling or overheating
+- Ensuring safe behavior during continuous operation
+
+---
+
+## Outcome
+
+The project demonstrates an end-to-end robotics system combining perception, control, and hardware integration, emphasizing practical engineering tradeoffs and system reliability.
