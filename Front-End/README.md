@@ -6,8 +6,7 @@ A modern, interactive Next.js web application for controlling the Goon Chair wit
 
 - 🎥 Livestream background with gradient overlay
 - 🔊 10 different sound buttons with particle effects
-- 🎯 Interactive controls (Track Person, Gooning Machine)
-- 🖱️ Custom sperm cursor
+- 🎯 Interactive controls 
 - ✨ White particle effects on button clicks
 - 🎨 Modern translucent glassmorphism design
 - 📱 Responsive design for all screen sizes
