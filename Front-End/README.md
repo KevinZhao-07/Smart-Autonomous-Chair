@@ -1,6 +1,6 @@
-# The Goon Chair - Frontend
+# The Smart Chair - Frontend
 
-A modern, interactive Next.js web application for controlling the Goon Chair with a beautiful UI built using shadcn/ui components.
+A modern, interactive Next.js web application for controlling the Smart Chair with a beautiful UI built using shadcn/ui components.
 
 ## Features
 
